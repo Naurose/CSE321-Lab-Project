@@ -283,12 +283,12 @@ void pm_wait(int parent_pid, int child_pid){
     while (1){
         int i;
         int found_zombie = -1;
-        int has_matching_child = 0;
+        int matching_child = 0;
         // check if parent has a matching child
         for (i = 0; i < process_count; i++){
             if (process_table[i].ppid == parent_pid){
                 if (child_pid == -1 || process_table[i].pid == child_pid){
-                    has_matching_child = 1;
+                    matching_child = 1;
                     if (process_table[i].state == ZOMBIE){
                         found_zombie = i;
                         break;
@@ -297,7 +297,7 @@ void pm_wait(int parent_pid, int child_pid){
             }
         }
         // if no child exists: return
-        if (has_matching_child == 0){
+        if (matching_child == 0){
             pthread_mutex_unlock(&lock);
             return;
         }
