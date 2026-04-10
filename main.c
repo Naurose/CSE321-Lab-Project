@@ -81,7 +81,7 @@ const char *state_name(State s){
     return "TERMINATED";
 }
 
-int find_process_index(int pid){
+int find_process_i(int pid){
     int i;
     for (i = 0; i < process_count; i++){
         if (process_table[i].pid == pid){
@@ -91,7 +91,7 @@ int find_process_index(int pid){
     return -1;
 }
 
-int get_worker_number(){
+int get_worker(){
     int i;
     pthread_t self_id = pthread_self();
     for (i = 0; i < worker_total; i++){
@@ -103,7 +103,7 @@ int get_worker_number(){
 }
 
 void add_child(int parent_pid, int child_pid){
-    int parent_index = find_process_index(parent_pid);
+    int parent_index = find_process_i(parent_pid);
     if (parent_index == -1){
         return;
     }
@@ -114,7 +114,7 @@ void add_child(int parent_pid, int child_pid){
 }
 
 void remove_child(int parent_pid, int child_pid){
-    int parent_index = find_process_index(parent_pid);
+    int parent_index = find_process_i(parent_pid);
     int i;
     if (parent_index == -1){
         return;
@@ -197,7 +197,7 @@ void pm_fork(int parent_pid){
         pthread_mutex_unlock(&lock);
         return;
     }
-    parent_index = find_process_index(parent_pid);
+    parent_index = find_process_i(parent_pid);
     if (parent_index == -1){
         printf("Parent process %d not found.\n", parent_pid);
         pthread_mutex_unlock(&lock);
@@ -213,7 +213,7 @@ void pm_fork(int parent_pid){
 
     add_child(parent_pid, next_pid);
     process_count++;
-    worker_number = get_worker_number();
+    worker_number = get_worker();
 
     if (worker_number == -1){
         sprintf(message, "pm_fork %d", parent_pid);
@@ -255,7 +255,7 @@ void pm_exit(int pid, int status){
                     }
                 }
             }
-            worker_number = get_worker_number();
+            worker_number = get_worker();
             if (worker_number == -1){
                 sprintf(message, "pm_exit %d %d", pid, status);
             } else{
@@ -275,7 +275,7 @@ void pm_exit(int pid, int status){
 void pm_wait(int parent_pid, int child_pid){
     int parent_index;
     pthread_mutex_lock(&lock);
-    parent_index = find_process_index(parent_pid);
+    parent_index = find_process_i(parent_pid);
     if (parent_index == -1){
         pthread_mutex_unlock(&lock);
         return;
@@ -318,7 +318,7 @@ void pm_wait(int parent_pid, int child_pid){
                 }
                 process_count--;
             }
-            worker_number = get_worker_number();
+            worker_number = get_worker();
             if (worker_number == -1){
                 sprintf(message, "pm_wait %d %d", parent_pid, child_pid);
             } else{
@@ -363,7 +363,7 @@ void pm_kill(int pid){
                     }
                 }
             }
-            worker_number = get_worker_number();
+            worker_number = get_worker();
             if (worker_number == -1){
                 sprintf(message, "pm_kill %d", pid);
             } else{
